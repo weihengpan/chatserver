@@ -5,6 +5,8 @@ import socket, asyncore
 PORT = 5005
 NAME = 'TestChat'
 
+print('Server initiating...')
+
 class EndSession(Exception): pass
 
 class CommandHandler:
@@ -14,10 +16,10 @@ class CommandHandler:
     """
 
 
-    def unknown(self, session, cmd):
-        'Respond to an unknown command'
-        #session.push('Unknown command: %s\r\n' % cmd)
-        self.broadcast(session.name+': '+cmd+'\r\n')
+    def say(self, session, line):
+        'Respond to a say command'
+        #session.push('say command: %s\r\n' % cmd)
+        self.broadcast(session.name+': '+line+'\r\n')
 
     def handle(self, session, line):
         'Handle a received line from a given session'
@@ -34,8 +36,8 @@ class CommandHandler:
             # Assume it's callable:
             meth(session, line)
         except TypeError:
-            # If it isn't, respond to the unknown command:
-            self.unknown(session, text)
+            # If it isn't, respond to the say command:
+            self.say(session, text)
 
 class Room(CommandHandler):
     """
@@ -114,10 +116,6 @@ class ChatRoom(Room):
         # Notify everyone that a user has left:
         self.broadcast(session.name + ' has left the room.\r\n')
 
-    '''
-    def do_say(self, session, line):
-        self.broadcast(session.name+': '+line+'\r\n')
-    '''
     def do_look(self, session, line):
         'Handles the look command, used to see who is in a room'
         session.push('The following are in this room:\r\n')
@@ -198,6 +196,7 @@ class ChatServer(dispatcher):
     def handle_accept(self):
         conn, addr = self.accept()
         ChatSession(self, conn)
+print('Server online.')
 
 if __name__ == '__main__':
     s = ChatServer(PORT, NAME)
