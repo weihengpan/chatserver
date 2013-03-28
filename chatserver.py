@@ -1,11 +1,15 @@
 from asyncore import dispatcher
 from asynchat import async_chat
-import socket, asyncore
+import socket, asyncore, datetime
 
 PORT = 5005
-NAME = 'TestChat'
+NAME = 'PChat'
+VER = '1.0.16'
 
-print('Server initiating...')
+help = "Help system is under constructing. Please wait for the future release.\r\n"
+
+
+print('Server initializing...')
 
 class EndSession(Exception): pass
 
@@ -15,29 +19,34 @@ class CommandHandler:
     library.
     """
 
-
     def say(self, session, line):
         'Respond to a say command'
-        #session.push('say command: %s\r\n' % cmd)
         self.broadcast(session.name+': '+line+'\r\n')
 
     def handle(self, session, line):
+        # print line
         'Handle a received line from a given session'
+        text = line
         if not line.strip(): return
         # Split off the command:
-        text = line
         parts = line.split(' ', 1)
         cmd = parts[0]
         try: line = parts[1].strip()
         except IndexError: line = ''
         # Try to find a handler:
-        meth = getattr(self, 'do_'+cmd, None)
         try:
+            if cmd[0] == r'/':
+                meth = getattr(self, 'do_'+cmd[1:len(cmd)], None)
+            else: 
+                raise TypeError
             # Assume it's callable:
             meth(session, line)
         except TypeError:
             # If it isn't, respond to the say command:
-            self.say(session, text)
+            if session.name != None: 
+                self.say(session, text)
+            else:
+                session.push('Please login first.\r\nThe login command is "/login <name>".\r\n')
 
 class Room(CommandHandler):
     """
@@ -66,6 +75,7 @@ class Room(CommandHandler):
 
     def do_logout(self, session, line):
         'Respond to the logout command'
+        print(session.name + ' has left the room.')
         raise EndSession
 
 class LoginRoom(Room):
@@ -75,19 +85,23 @@ class LoginRoom(Room):
 
     def add(self, session):
         Room.add(self, session)
+        rawdate = datetime.datetime.now()
+        date = str(rawdate.hour) + ':' + str(rawdate.minute) + ':' + str(rawdate.second) + ', ' + str(rawdate.year) + '.' + str(rawdate.month) + '.' + str(rawdate.day) + ' UTC+8:00'
         # When a user enters, greet him/her:
-        self.broadcast('Welcome to %s\r\n' % self.server.name)
+        self.broadcast('Welcome to %s.\r\n' % self.server.name)
+        self.broadcast('Current time is ' + date + '\r\n')
+        self.broadcast('\r\nCurrent server version is: %s\r\n' % VER)
 
     def unknown(self, session, cmd):
         # All unknown commands (anything except login or logout)
         # results in a prodding:
-        session.push('Please log in\nUse "login <nick>"\r\n')
+        session.push('Please log in.\nUse "login <name>"\r\n')
 
     def do_login(self, session, line):
         name = line.strip()
         # Make sure the user has entered a name:
         if not name:
-            session.push('Please enter a name\r\n')
+            session.push('Please enter a name.\r\n')
         # Make sure that the name isn't in use:
         elif name in self.server.users:
             session.push('The name "%s" is taken.\r\n' % name)
@@ -97,6 +111,18 @@ class LoginRoom(Room):
             # the user is moved into the main room.
             session.name = name
             session.enter(self.server.main_room)
+            hour = datetime.datetime.now().hour
+            if 6 < hour < 12:
+                session.push('Good morning, %s, remember to concentrate your time to important things.' % name)
+            elif 12 < hour < 15:
+                session.push("It's noon now, %s, how about take a nap?" % name)
+            elif 15 < hour < 18:
+                session.push('Good afternoon, %s, what about a cup of tea?' % name)
+            elif hour > 18:
+                session.push("Good evening, %s, time to watch TV with your family, ain't it?" % name)
+            else:
+                session.push('Time to sleep now, tired and hard-working %s, do not be like me.' % name)
+            session.push('\r\nWelcome home.\r\n')
 
 class ChatRoom(Room):
     """
@@ -107,6 +133,7 @@ class ChatRoom(Room):
     def add(self, session):
         # Notify everyone that a new user has entered:
         self.broadcast(session.name + ' has entered the room.\r\n')
+        print(session.name + ' has entered the room.')
         self.server.users[session.name] = session
         Room.add(self, session)
 
@@ -127,6 +154,11 @@ class ChatRoom(Room):
         session.push('The following are logged in:\r\n')
         for name in self.server.users:
             session.push(name + '\r\n')
+
+    def do_help(self, session, line):
+        "Handles the help command, used to show this server's help"
+        session.push(help)
+        session.push('\r\nVer. ' + VER + '\r\n')
 
 class LogoutRoom(Room):
     """
@@ -196,7 +228,8 @@ class ChatServer(dispatcher):
     def handle_accept(self):
         conn, addr = self.accept()
         ChatSession(self, conn)
-print('Server online.')
+
+print('ChatServer online. Using Telnet protocol, listening port %s.' % PORT)
 
 if __name__ == '__main__':
     s = ChatServer(PORT, NAME)
