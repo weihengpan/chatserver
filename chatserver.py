@@ -1,15 +1,35 @@
 from asyncore import dispatcher
 from asynchat import async_chat
-import socket, asyncore, datetime
+import socket, asyncore, datetime, random, types
 
-PORT = 5005
 NAME = 'PChat'
-VER = '1.0.16'
+VER = '1.1.4'
 
-help = "Help system is under constructing. Please wait for the future release.\r\n"
+help = "Help system is under construction. Please wait for the future release.\r\n"
 
+# Used to ask the user for the port number
+def getPort():
+    tp = raw_input('Port("r" for random):')
+    if tp.lower() == 'r':
+        p = random.randrange(49152,65535) # Get a random port from the floating ports list
+        return p
+    elif tp.isdigit() == True and 0 < int(tp) <= 65535: # Check if tp is a valid port number
+        p = int(tp) # Return the value in int format
+        return p
+    else:
+        print('Invalid value.')
+        p = getPort() # Recursion
+        return p
 
-print('Server initializing...')
+# Init
+
+port = getPort()
+
+print('\r\nPort: %s' % port)
+print('Protocol: Telnet')
+print('Server init...')
+
+# Class definations
 
 class EndSession(Exception): pass
 
@@ -24,7 +44,6 @@ class CommandHandler:
         self.broadcast(session.name+': '+line+'\r\n')
 
     def handle(self, session, line):
-        # print line
         'Handle a received line from a given session'
         text = line
         if not line.strip(): return
@@ -75,7 +94,6 @@ class Room(CommandHandler):
 
     def do_logout(self, session, line):
         'Respond to the logout command'
-        print(session.name + ' has left the room.')
         raise EndSession
 
 class LoginRoom(Room):
@@ -86,11 +104,11 @@ class LoginRoom(Room):
     def add(self, session):
         Room.add(self, session)
         rawdate = datetime.datetime.now()
-        date = str(rawdate.hour) + ':' + str(rawdate.minute) + ':' + str(rawdate.second) + ', ' + str(rawdate.year) + '.' + str(rawdate.month) + '.' + str(rawdate.day) + ' UTC+8:00'
+        date = str(rawdate.hour) + ':' + str(rawdate.minute) + ':' + str(rawdate.second) + ', ' + str(rawdate.year) + '.' + str(rawdate.month) + '.' + str(rawdate.day) + ' UTC+0800'
         # When a user enters, greet him/her:
         self.broadcast('Welcome to %s.\r\n' % self.server.name)
-        self.broadcast('Current time is ' + date + '\r\n')
-        self.broadcast('\r\nCurrent server version is: %s\r\n' % VER)
+        self.broadcast('Time: %s\r\n' % date)
+        self.broadcast('Ver. %s\r\n' % VER)
 
     def unknown(self, session, cmd):
         # All unknown commands (anything except login or logout)
@@ -112,16 +130,16 @@ class LoginRoom(Room):
             session.name = name
             session.enter(self.server.main_room)
             hour = datetime.datetime.now().hour
-            if 6 < hour < 12:
+            if 6 <= hour < 12:
                 session.push('Good morning, %s, remember to concentrate your time to important things.' % name)
-            elif 12 < hour < 15:
+            elif 12 <= hour < 15:
                 session.push("It's noon now, %s, how about take a nap?" % name)
-            elif 15 < hour < 18:
+            elif 15 <= hour < 18:
                 session.push('Good afternoon, %s, what about a cup of tea?' % name)
-            elif hour > 18:
+            elif 18 <= hour < 22:
                 session.push("Good evening, %s, time to watch TV with your family, ain't it?" % name)
             else:
-                session.push('Time to sleep now, tired and hard-working %s, do not be like me.' % name)
+                session.push("Time to sleep now, tired and hard-working %s, don't be like me." % name)
             session.push('\r\nWelcome home.\r\n')
 
 class ChatRoom(Room):
@@ -142,6 +160,7 @@ class ChatRoom(Room):
         Room.remove(self, session)
         # Notify everyone that a user has left:
         self.broadcast(session.name + ' has left the room.\r\n')
+        print(session.name + ' has left the room.')
 
     def do_look(self, session, line):
         'Handles the look command, used to see who is in a room'
@@ -158,7 +177,7 @@ class ChatRoom(Room):
     def do_help(self, session, line):
         "Handles the help command, used to show this server's help"
         session.push(help)
-        session.push('\r\nVer. ' + VER + '\r\n')
+        session.push('\r\nVer. %s\r\n' % VER)
 
 class LogoutRoom(Room):
     """
@@ -229,9 +248,9 @@ class ChatServer(dispatcher):
         conn, addr = self.accept()
         ChatSession(self, conn)
 
-print('ChatServer online. Using Telnet protocol, listening port %s.' % PORT)
+print('Server online.')
 
 if __name__ == '__main__':
-    s = ChatServer(PORT, NAME)
+    s = ChatServer(port, NAME)
     try: asyncore.loop()
     except KeyboardInterrupt: print
