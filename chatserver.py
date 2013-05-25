@@ -1,6 +1,6 @@
 from asyncore import dispatcher
 from asynchat import async_chat
-import socket, asyncore, datetime, random
+import sys, socket, asyncore, datetime, random
 
 NAME = 'PChat'
 VER = '1.1.4'
@@ -22,10 +22,20 @@ def getPort():
         p = getPort() # Recursion
         return p
 
-# Init
+# Init function (not a magic function)
+def init():
+    if len(sys.argv) == 1:
+        p = getPort()
+        return p
+    elif sys.argv[1] == '-p' and sys.argv[2].isdigit() and (0 < int(sys.argv[2]) <= 65535) == True:
+        p = int(sys.argv[2])
+        return p
+    else:
+        print('Wrong arguments. Please try again.')
+        sys.exit()
 
-port = getPort()
-
+# Init!
+port = init()
 print('\r\nPort: %s' % port)
 print('Protocol: Telnet')
 print('Server init...')
