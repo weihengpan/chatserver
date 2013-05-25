@@ -1,14 +1,15 @@
 from asyncore import dispatcher
 from asynchat import async_chat
-import socket, asyncore, datetime, random, types
+import socket, asyncore, datetime, random
 
 NAME = 'PChat'
 VER = '1.1.4'
 
-help = "Help system is under construction. Please wait for the future release.\r\n"
+help = 'Help system is under construction. Please wait for the future release.\r\n'
 
-# Used to ask the user for the port number
+
 def getPort():
+    'Ask user the port number'
     tp = raw_input('Port("r" for random):')
     if tp.lower() == 'r':
         p = random.randrange(49152,65535) # Get a random port from the floating ports list
@@ -29,7 +30,7 @@ print('\r\nPort: %s' % port)
 print('Protocol: Telnet')
 print('Server init...')
 
-# Class definations
+# Class definitions
 
 class EndSession(Exception): pass
 
