@@ -1,4 +1,4 @@
-**A simple chatting server-side script using Python.**
+# A simple chatting server-side script using Python.
 
 -----------------------------------
 
@@ -9,9 +9,8 @@
 -----------------------------------
 
 **Client Commands**
-`
-/login <name>    *Login using the name*
-/logout          *Logout*
-/who             *See who is logged in*
-/help            *Get the help*
-`
+
+* /login <name>    *Login using the name*
+* /logout          *Logout*
+* /who             *See who is logged in*
+* /help            *Get the help*
