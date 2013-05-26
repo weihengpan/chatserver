@@ -3,9 +3,9 @@ from asynchat import async_chat
 import sys, socket, asyncore, datetime, random
 
 NAME = 'PChat'
-VER = '1.1.4'
+VER = '1.1.5'
 
-help = 'Help system is under construction. Please wait for the future release.\r\n'
+help = [r'**Client Commands**',r'/login <name>    *Login using the name*',r'/logout          *Logout*',r'/who             *See who is logged in*',r'/help            *Get the help*']
 
 
 def getPort():
@@ -187,8 +187,9 @@ class ChatRoom(Room):
 
     def do_help(self, session, line):
         "Handles the help command, used to show this server's help"
-        session.push(help)
-        session.push('\r\nVer. %s\r\n' % VER)
+        session.push('\r\n')
+        for h in help:
+            session.push(h + '\r\n')
 
 class LogoutRoom(Room):
     """
