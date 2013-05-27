@@ -1,5 +1,5 @@
 # ChatServer
-### A simple Pythoh chatting server.
+### A simple Python chatting server.
 
 -----------------------------------
 
