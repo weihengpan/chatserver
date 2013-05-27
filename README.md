@@ -1,4 +1,5 @@
-# A simple chatting server-side script using Python.
+# ChatServer
+### A simple Pythoh chatting server.
 
 -----------------------------------
 
