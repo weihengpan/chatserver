@@ -27,9 +27,13 @@ def init():
     if len(sys.argv) == 1:
         p = getPort()
         return p
-    elif sys.argv[1] == '-p' and sys.argv[2].isdigit() and (0 < int(sys.argv[2]) <= 65535) == True:
-        p = int(sys.argv[2])
-        return p
+    elif sys.argv[1] == '-p':
+        if sys.argv[2].isdigit() and (0 < int(sys.argv[2]) <= 65535) == True:
+            p = int(sys.argv[2])
+            return p
+        elif sys.argv[2].lower() == 'r':
+            p = random.randrange(49152,65535)
+            return p
     else:
         print('Wrong arguments. Please try again.')
         sys.exit()
