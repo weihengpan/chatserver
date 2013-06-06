@@ -10,23 +10,18 @@ help = [r'**Client Commands**',r'/login <name>    *Login using the name*',r'/log
 
 def getPort():
     'Ask user the port number'
-    tp = raw_input('Port("r" for random):')
-    if tp.lower() == 'r':
-        p = random.randrange(49152,65535) # Get a random port from the floating ports list
-        return p
-    elif tp.isdigit() == True and 0 < int(tp) <= 65535: # Check if tp is a valid port number
-        p = int(tp) # Return the value in int format
-        return p
-    else:
-        print('Invalid value.')
-        p = getPort() # Recursion
-        return p
-
-# Init function (not a magic function)
-def init():
     if len(sys.argv) == 1:
-        p = getPort()
-        return p
+        tp = raw_input('Port("r" for random):')
+        if tp.lower() == 'r':
+            p = random.randrange(49152,65535) # Get a random port from the floating ports list
+            return p
+        elif tp.isdigit() == True and 0 < int(tp) <= 65535: # Check if tp is a valid port number
+            p = int(tp) # Return the value in int format
+            return p
+        else:
+            print('Invalid value.')
+            p = getPort() # Recursion
+            return p
     elif sys.argv[1] == '-p':
         if sys.argv[2].isdigit() and (0 < int(sys.argv[2]) <= 65535) == True:
             p = int(sys.argv[2])
@@ -39,8 +34,9 @@ def init():
         sys.exit()
 
 # Init!
-port = init()
-print('\r\nPort: %s' % port)
+port = getPort()
+print('\r\n')
+print('Port: %s' % port)
 print('Protocol: Telnet')
 print('Server init...')
 
