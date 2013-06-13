@@ -36,7 +36,7 @@ def getPort():
 # Init!
 port = getPort()
 print('\r\n')
-print('Port: %s' % port)
+print('Port:', port)
 print('Protocol: Telnet')
 print('Server init...')
 
@@ -150,7 +150,7 @@ class LoginRoom(Room):
             elif 18 <= hour < 22:
                 session.push("Good evening, %s, time to watch TV with your family, ain't it?" % name)
             else:
-                session.push("Time to sleep now, tired and hard-working %s, don't be like me." % name)
+                session.push("Time to sleep now, tired and hard-working %s, not like me." % name)
             session.push('\r\nWelcome home.\r\n')
 
 class ChatRoom(Room):
