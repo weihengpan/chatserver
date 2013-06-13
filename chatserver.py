@@ -5,7 +5,11 @@ import sys, socket, asyncore, datetime, random
 NAME = 'PChat'
 VER = '1.1.5'
 
-help = [r'**Client Commands**',r'/login <name>    *Login using the name*',r'/logout          *Logout*',r'/who             *See who is logged in*',r'/help            *Get the help*']
+help = [r'**Client Commands**',\
+        r'/login <name>    *Login using the name*',\
+        r'/logout          *Logout*',\
+        r'/who             *See who is logged in*',\
+        r'/help            *Get the help*']
 
 
 def getPort():
