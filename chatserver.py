@@ -40,7 +40,7 @@ def getPort():
 # Init!
 port = getPort()
 print('\r\n')
-print('Port:', port)
+print('Port: ' + str(port))
 print('Protocol: Telnet')
 print('Server init...')
 
